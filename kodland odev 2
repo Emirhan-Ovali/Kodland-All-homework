@@ -1,0 +1,76 @@
+from flask import Flask, request, render_template_string
+import random
+import string
+
+app = Flask(__name__)
+
+# Rastgele gerçekler listesi
+r = [
+    "Teknolojik bağımlılıktan mustarip olan çoğu kişi, kendilerini şebeke kapsama alanı dışında bulduklarında veya cihazlarını kullanamadıkları zaman yoğun stres yaşarlar.",
+    "2019'da yapılan bir araştırmaya göre, insanların %60'ından fazlası akıllı telefonlarındaki iş mesajlarına işten ayrıldıktan sonraki 15 dakika içinde yanıt veriyor.",
+    "Teknolojik bağımlılıkla mücadele etmenin bir yolu, zevk veren ve ruh halini iyileştiren faaliyetler aramaktır.",
+    "Sosyal ağların olumlu ve olumsuz yanları vardır ve bu platformları kullanırken her ikisinin de farkında olmalıyız."
+]
+
+# Resim URL'leri listesi
+resimler = [
+    "https://via.placeholder.com/150?text=Resim+1",
+    "https://via.placeholder.com/150?text=Resim+2",
+    "https://via.placeholder.com/150?text=Resim+3"
+]
+
+@app.route("/")
+def hello_world():
+    return '''
+        <a href="/ikincisayfa">Rastgele bir gerçeği görüntüle!</a><br>
+        <a href="/yazi-tura">Yazı Tura Oynayın!</a><br>
+        <a href="/sifre-olustur">Rastgele Şifre Oluşturun!</a><br>
+        <a href="/rastgele-resim">Rastgele Resim Görüntüleyin!</a><br>
+        <a href="/kisisel-bilgi-formu">Kişisel Bilgi Formunu Doldurun!</a>
+    '''
+
+@app.route("/ikincisayfa")
+def ikincisayfa():
+    return f'<p>{random.choice(r)}</p>'
+
+@app.route("/yazi-tura")
+def yazi_tura():
+    sonuc = "Yazı" if random.choice([True, False]) else "Tura"
+    return f'<p>Sonuç: {sonuc}</p>'
+
+@app.route("/sifre-olustur")
+def sifre_olustur():
+    uzunluk = 12
+    karakterler = string.ascii_letters + string.digits + string.punctuation
+    sifre = ''.join(random.choice(karakterler) for _ in range(uzunluk))
+    return f'<p>Rastgele Şifre: {sifre}</p>'
+
+@app.route("/rastgele-resim")
+def rastgele_resim():
+    resim_url = random.choice(resimler)
+    return f'<img src="{resim_url}" alt="Rastgele Resim">'
+
+@app.route("/kisisel-bilgi-formu", methods=["GET", "POST"])
+def kisisel_bilgi_formu():
+    if request.method == "POST":
+        ad = request.form.get("ad")
+        yas = int(request.form.get("yas"))
+        
+        if yas < 13:
+            mesaj = "Bu site sizin için uygun değil."
+        else:
+            mesaj = f"Merhaba {ad}, {yas} yaşındasınız!Bu site sizin için uygun. Web sitemizi ziyaret ettiğiniz için teşekkürler."
+        
+        return f'<p>{mesaj}</p>'
+    
+    form_html = '''
+        <form method="post">
+            Adınız: <input type="text" name="ad" required><br>
+            Yaşınız: <input type="number" name="yas" required><br>
+            <input type="submit" value="Gönder">
+        </form>
+    '''
+    return render_template_string(form_html)
+
+if __name__ == "__main__":
+    app.run(debug=True)
